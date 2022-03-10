@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+        integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+</head>
+
+<body>
+    <div id="app">
+
+        <div>
+            <button  @click="pageChange('one')" class="btn border m-2">第一題</button>
+            <button @click="pageChange('two')" class="btn border">第二題</button>
+        </div>
+        <div v-if="page==='one'" style="display:inline-flex;">
+            <div class="first">
+                <input v-model="number" type="number" type='text' onkeyup="value=value.replace(/^(0+)|[^\d]+/g,'')">
+
+
+            </div>
+            <div class="second">
+                <select v-model="type">
+                    <option value="isPrime">是否質數</option>
+                    <option value="isFibonacci">是否斐波那契</option>
+                </select>
+            </div>
+            <div class="third">
+                {{ result }}
+            </div>
+        </div>
+        <div v-if="page==='two'">
+            <input type="text" v-model="war">
+            <ul v-for="opt in filterWarByInput" :key="opt">
+                <li>
+                    {{ opt }}
+                </li>
+            </ul>
+
+
+        </div>
+
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                number: Number,
+                type: 'isPrime',
+                result: false,
+                wars: [],
+                war: '',
+                page:'one',
+            },
+            mounted() {
+                this.callApi()
+            },
+
+            watch: {
+                number: function () {
+                    this.result = this.test(this.type, this.number);
+                },
+                type: function () {
+                    this.result = this.test(this.type, this.number);
+                }
+            },
+            computed: {
+                filterWarByInput: function () {
+                    return this.wars.filter(item => !item.toLowerCase().indexOf(this.war.toLowerCase()))
+                },
+            },
+
+
+            methods: {
+                test(type, num) {
+                    const v = Number(num)
+                    if (type === 'isPrime') {
+
+                        if (v === 1) {
+                            return false;
+                        } else if (v === 2) {
+                            return true;
+                        } else {
+                            for (let i = 2; i < v; i++) {
+                                if (v % i === 0) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
+                    } else {
+                        let fibonacci = []
+                        for (var i = 1; i <= v; i++) {
+                            fibonacci.push(this.fib(i));
+                        }
+
+                        if (fibonacci.indexOf(v) !== -1) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+
+                    }
+                },
+                callApi() {
+                    axios.get('https://api.publicapis.org/categories')
+                        .then(response => {
+                            this.wars = response.data.categories;
+                        }).catch(function (error) {
+
+                        })
+                },
+                fib(n) {
+                    n = n && parseInt(n);
+                    let n1 = 1;
+                    let n2 = 1;
+                    if (n == 1 || n == 2) {
+                        return 1;
+                    }
+                    for (let i = 2; i < n; i++) {
+                        [n1, n2] = [n2, n1 + n2]
+                    }
+                    return n2
+                },
+                pageChange(page){
+                    this.page=page;
+                }
+
+            },
+            created() {
+
+            },
+
+
+        })
+
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .first {
+            height: 100vh;
+            width: 200px;
+        }
+
+        .second {
+            height: 100vh;
+            width: calc(100vw - 500px);
+            overflow-x: auto;
+        }
+
+        .third {
+            height: 100vh;
+            width: 300px;
+        }
+
+        @media screen and (min-width: 600px) {
+            .second {
+                min-width: 100px;
+                overflow-x: hidden;
+            }
+        }
+    </style>
+</body>
+
+</html>
